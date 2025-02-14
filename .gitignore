@@ -1,0 +1,63 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+.postman/environments/
+
+.playwright/
+
+*videos*
+*screenshots*
+
+.env
+.env.personal
+.env.prod
+
+.aws.values.json
+
+# compiled output
+**/dist
+/tmp
+/out-tsc
+
+# dependencies
+/node_modules
+*node_modules*
+
+cdk.out
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+npm-debug.log
+yarn-error.log
+testem.log
+/typings
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Serverless
+.serverless
+.webpack
+
+# Next.js
+.next
+.nx/cache
+.nx/workspace-data
+.aider*
