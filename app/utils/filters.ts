@@ -1,4 +1,7 @@
 /* eslint-disable no-param-reassign */
+
+import { TreeViewBaseItem } from '@mui/x-tree-view/models';
+
 // Helper functions for trees/filtering
 export const pathsToTreeNodes = (pathStrings: string[], pathDelimiter: string) => {
   const tree: { [key: string]: any } = {};
@@ -26,7 +29,7 @@ export const pathsToTreeNodes = (pathStrings: string[], pathDelimiter: string) =
         node.children = children;
         node.children.forEach(objectToArr);
       } else {
-        node.children = null;
+        node.children = undefined;
       }
     }
   }
@@ -39,36 +42,174 @@ export const pathsToTreeNodes = (pathStrings: string[], pathDelimiter: string) =
   return allNodes.length === 0 ? [{ children: [] }] : allNodes;
 };
 
-export const defaultMatcher = (filterText: any, node: any) => node.name.toLowerCase().indexOf(filterText.toLowerCase()) !== -1;
+const parsePathForSeparators = (params: { path: string; currIndex: number }): boolean => {
+  const { path, currIndex } = params;
 
-export const findNode = (node: any, filter: any, matcher: any) =>
-  matcher(filter, node) || // i match
-  (node.children && // or i have decendents and one of them match
-    node.children.length &&
-    !!node.children.find((child: any) => findNode(child, filter, matcher)));
-
-export const filterTree = (node: any, filter: any, matcher = defaultMatcher) => {
-  // If im an exact match then all my children get to stay
-  if (matcher(filter, node) || !node.children) {
-    return node;
+  if (currIndex === 0 && path[currIndex] !== '/') {
+    throw new Error(`Invalid path; must start with "/": ${path}`);
   }
-  // If not then only keep the ones that match or have matching descendants
-  const filtered = node.children.filter((child: any) => findNode(child, filter, matcher)).map((child: any) => filterTree(child, filter, matcher));
-  return Object.assign({}, node, { children: filtered });
+
+  if (currIndex == path.length && path[currIndex] === '/') {
+    throw new Error(`Invalid path; cannot end with "/": ${path}`);
+  }
+
+  if (currIndex >= path.length) {
+    throw new Error('Invalid index; must be less than path length');
+  }
+
+  const pos = path[currIndex];
+  if (pos === '/') {
+    return true;
+  } else {
+    return false;
+  }
 };
 
-export const expandFilteredNodes = (n: any, f: any, m = defaultMatcher) => {
+const parsePathPrefixBySeparators = (params: { path: string; separatorIndex: number; separator: string }): string => {
+  const { path, separatorIndex, separator } = params;
+
+  if (separatorIndex === 0) {
+    throw new Error('Invalid separatorIndex; must be greater than 0');
+  }
+
+  if (separatorIndex >= path.length) {
+    throw new Error('Invalid separatorIndex; must be less than path length');
+  }
+
+  if (path[separatorIndex] !== separator) {
+    throw new Error(`Invalid index; must be "${separator}": ${path}:${separatorIndex}`);
+  }
+
+  if (separatorIndex == path.length - 1) {
+    return path;
+  }
+
+  const index = path.indexOf(separator, separatorIndex);
+  const result = path.slice(0, index);
+  return result;
+};
+
+const buildHierarchy = (params: { path: string; separator: string }): string[] => {
+  const { path, separator } = params;
+
+  const hierarchy = [];
+
+  // loop through each string looking for separators
+  for (let i = 0; i < path.length; i++) {
+    if (parsePathForSeparators({ path, currIndex: i })) {
+      if (i === 0) {
+        // first character should be separator, so skip
+      } else {
+        // if separator found, parse the prefix
+        const prefix = parsePathPrefixBySeparators({ path, separatorIndex: i, separator });
+
+        hierarchy.push(prefix);
+      }
+    }
+  }
+  return hierarchy;
+};
+
+const parseLabel = (params: { path: string; separator: string }): string => {
+  const { path, separator } = params;
+
+  const lastIndex = path.lastIndexOf(separator);
+
+  if (lastIndex === -1) {
+    throw new Error(`Invalid path; does not contain "${separator}": ${path}`);
+  }
+  return path.substring(lastIndex + 1);
+};
+
+export const processPathsToTree = (params: { paths: string[]; separator: string }): TreeViewBaseItem[] => {
+  const { paths, separator } = params;
+
+  const tree: TreeViewBaseItem[] = [];
+
+  paths.forEach((item) => {
+    const hierarchy = buildHierarchy({ path: item, separator });
+
+    if (hierarchy.length === 0) {
+      throw new Error(`Invalid path; could not parse hierarchy: ${item}`);
+    }
+
+    // where to search
+    let parent = tree;
+    let index = 0;
+    let last: TreeViewBaseItem | undefined;
+
+    while (index < hierarchy.length) {
+      const hierarchyItem = hierarchy[index];
+
+      // find if parent exists
+      let found = parent.find((x) => x.id === hierarchyItem);
+
+      if (!found) {
+        // if no root parent, create it
+        found = {
+          id: hierarchyItem,
+          label: parseLabel({ path: hierarchyItem, separator }),
+          children: [],
+        } as TreeViewBaseItem;
+
+        parent.push(found);
+      }
+
+      // move to next hierarchy level
+      last = found;
+      parent = last.children as TreeViewBaseItem[];
+      index++;
+    }
+
+    if (!last) {
+      throw new Error('Invalid state; last should not be undefined');
+    }
+
+    last.children?.push({
+      id: item,
+      label: parseLabel({ path: item, separator }),
+    });
+  });
+
+  return tree;
+};
+
+export const filterTree = (tree: TreeViewBaseItem[], filter: string): TreeViewBaseItem[] => {
+  return tree.reduce((results, node) => {
+    let filteredNode = null;
+
+    if (node.label.toLowerCase().includes(filter.toLowerCase())) {
+      filteredNode = { ...node };
+    }
+
+    if (node.children && node.children.length > 0) {
+      const filteredChildren = filterTree(node.children, filter);
+      if (filteredChildren.length > 0) {
+        filteredNode = filteredNode ? filteredNode : { ...node };
+        filteredNode.children = filteredChildren;
+      }
+    }
+
+    if (filteredNode) {
+      results.push(filteredNode);
+    }
+
+    return results;
+  }, [] as TreeViewBaseItem[]);
+};
+
+export const expandFilteredNodes = (n: any, f: any) => {
   const keys: string[] = [];
-  const helper = (node: any, filter: any, matcher: any) => {
+  const helper = (node: any, filter: any) => {
     let { children } = node;
     if (!children || children.length === 0) {
       return Object.assign({}, node, { toggled: false });
     }
-    const childrenWithMatches = node.children.filter((child: any) => findNode(child, filter, matcher));
+    const childrenWithMatches = node.children.filter((child: any) => filterExistsInTreeItem(child, filter));
     const shouldExpand = childrenWithMatches.length > 0;
     // If im going to expand, go through all the matches and see if their children need to expand
     if (shouldExpand) {
-      children = childrenWithMatches.map((child: any) => helper(child, filter, matcher));
+      children = childrenWithMatches.map((child: any) => helper(child, filter));
       keys.push(node.key);
     }
     return Object.assign({}, node, {
@@ -77,7 +218,7 @@ export const expandFilteredNodes = (n: any, f: any, m = defaultMatcher) => {
     });
   };
 
-  const newNode = helper(n, f, m);
+  const newNode = helper(n, f);
 
   return { node: newNode, keys };
 };

@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { Grid2 } from '@mui/material';
 import SearchTree from '@/app/components/searchTree/search-tree';
-import ParamTable from '@/app/components/param-table/param-table';
+import ParamTable from '@/app/components/paramTable/param-table';
 import { useAtomValue } from 'jotai';
 import { pathDelimiterAtom } from '@/app/store';
 import { stripTrailingPathDelimiter } from '@/app/utils';
@@ -65,14 +65,16 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paramNames]);
 
-  const onSearchTreeSelect = (keys: string[]): void => {
-    setTableFilter(stripTrailingPathDelimiter(keys[0], pathDelimiter));
+  const handleSearchTreeItemSelect = (_event: React.SyntheticEvent, itemId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setTableFilter(stripTrailingPathDelimiter(itemId, pathDelimiter));
+    }
   };
 
   return (
     <Grid2 container spacing={2}>
       <Grid2 size={4}>
-        <SearchTree data={parameters} onSearchTreeSelect={onSearchTreeSelect} />
+        <SearchTree paramNames={paramNames} handleSearchTreeItemSelect={handleSearchTreeItemSelect} />
       </Grid2>
       <Grid2 size={8}>
         <ParamTable data={parameters} tableFilter={tableFilter} />
