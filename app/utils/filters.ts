@@ -197,28 +197,3 @@ export const filterTree = (tree: TreeViewBaseItem[], filter: string): TreeViewBa
     return results;
   }, [] as TreeViewBaseItem[]);
 };
-
-export const expandFilteredNodes = (n: any, f: any) => {
-  const keys: string[] = [];
-  const helper = (node: any, filter: any) => {
-    let { children } = node;
-    if (!children || children.length === 0) {
-      return Object.assign({}, node, { toggled: false });
-    }
-    const childrenWithMatches = node.children.filter((child: any) => filterExistsInTreeItem(child, filter));
-    const shouldExpand = childrenWithMatches.length > 0;
-    // If im going to expand, go through all the matches and see if their children need to expand
-    if (shouldExpand) {
-      children = childrenWithMatches.map((child: any) => helper(child, filter));
-      keys.push(node.key);
-    }
-    return Object.assign({}, node, {
-      children,
-      toggled: shouldExpand,
-    });
-  };
-
-  const newNode = helper(n, f);
-
-  return { node: newNode, keys };
-};

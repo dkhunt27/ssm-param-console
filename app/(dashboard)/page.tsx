@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { Parameter } from '@aws-sdk/client-ssm';
 import { useSsmParam } from '@/app/hooks';
-import { useEffect, useState } from 'react';
+import { MouseEventHandler, useEffect, useState } from 'react';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { Grid2 } from '@mui/material';
 import SearchTree from '@/app/components/searchTree/search-tree';
@@ -71,13 +71,17 @@ export default function DashboardPage() {
     }
   };
 
+  const handleParamBreadcrumbSelect = (path: string): void => {
+    setTableFilter(path);
+  };
+
   return (
     <Grid2 container spacing={2}>
       <Grid2 size={4}>
         <SearchTree paramNames={paramNames} handleSearchTreeItemSelect={handleSearchTreeItemSelect} />
       </Grid2>
       <Grid2 size={8}>
-        <ParamTable data={parameters} tableFilter={tableFilter} />
+        <ParamTable parameters={parameters} tableFilter={tableFilter} handleParamBreadcrumbSelect={handleParamBreadcrumbSelect} />
       </Grid2>
     </Grid2>
   );

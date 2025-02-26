@@ -1,5 +1,5 @@
 import { pathDelimiterAtom } from '@/app/store';
-import { expandFilteredNodes, filterTree, pathsToTreeNodes, processPathsToTree } from '@/app/utils/filters';
+import { filterTree, processPathsToTree } from '@/app/utils/filters';
 import { Stack, TextField } from '@mui/material';
 import { useAtomValue } from 'jotai';
 import { ReactElement, useEffect, useState } from 'react';
@@ -18,7 +18,6 @@ const SearchTree = (props: PropsType): ReactElement => {
   const [searchText, setSearchText] = useState('');
   const [unfilteredTree, setUnfilteredTree] = useState<TreeViewBaseItem[]>([]);
   const [filteredTree, setFilteredTree] = useState<TreeViewBaseItem[]>([]);
-  const [expandedKeys, setExpandedKeys] = useState<any[]>([]);
 
   useEffect(() => {
     if (paramNames && pathDelimiter) {
@@ -31,20 +30,15 @@ const SearchTree = (props: PropsType): ReactElement => {
 
   const onFilterChange = (e: any): void => {
     const filter = e.target && e.target.value.trim();
-    console.log('filter', filter);
-    // console.log('treeRootNode', treeRootNode);
 
     if (filter) {
       let filtered = filterTree(unfilteredTree, filter);
-      // filtered = expandFilteredNodes(filtered, filter);
 
       setFilteredTree(filtered);
-      // setExpandedKeys(filtered.keys);
       setSearchText(filter);
     } else {
       // reset filter/search
       setFilteredTree(unfilteredTree);
-      setExpandedKeys([]);
       setSearchText('');
       return;
     }
