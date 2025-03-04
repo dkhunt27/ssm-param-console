@@ -1,6 +1,6 @@
 import { pathDelimiterAtom } from '@/app/store';
 import { filterTree, processPathsToTree } from '@/app/utils/filters';
-import { Stack, TextField } from '@mui/material';
+import { Stack } from '@mui/material';
 import { useAtomValue } from 'jotai';
 import { ReactElement, useEffect, useState } from 'react';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
@@ -9,13 +9,15 @@ import { TreeItem2 } from '@mui/x-tree-view/TreeItem2';
 
 type PropsType = {
   paramNames: string[];
+  filterText: string;
   handleSearchTreeItemSelect: (event: React.SyntheticEvent, itemId: string, isSelected: boolean) => void;
 };
 
-const SearchTree = (props: PropsType): ReactElement => {
+export const ParamTree = (props: PropsType): ReactElement => {
+  const { filterText, paramNames, handleSearchTreeItemSelect } = props;
+
   const pathDelimiter = useAtomValue(pathDelimiterAtom);
-  const { paramNames, handleSearchTreeItemSelect } = props;
-  const [searchText, setSearchText] = useState('');
+  const [expanded, setExpanded] = useState<string[]>([]);
   const [unfilteredTree, setUnfilteredTree] = useState<TreeViewBaseItem[]>([]);
   const [filteredTree, setFilteredTree] = useState<TreeViewBaseItem[]>([]);
 
@@ -26,32 +28,36 @@ const SearchTree = (props: PropsType): ReactElement => {
       setFilteredTree(searchTreeNodes);
       setUnfilteredTree(searchTreeNodes);
     }
-  }, [paramNames, pathDelimiter]);
+  }, [filterText, paramNames, pathDelimiter]);
 
-  const onFilterChange = (e: any): void => {
-    const filter = e.target && e.target.value.trim();
-
-    if (filter) {
-      let filtered = filterTree(unfilteredTree, filter);
-
+  useEffect(() => {
+    if (filterText && unfilteredTree) {
+      let filtered = filterTree(unfilteredTree, filterText);
       setFilteredTree(filtered);
-      setSearchText(filter);
     } else {
-      // reset filter/search
       setFilteredTree(unfilteredTree);
-      setSearchText('');
-      return;
     }
-  };
+  }, [filterText, unfilteredTree]);
+
+  useEffect(() => {
+    function recursiveKeys(node: TreeViewBaseItem): string[] {
+      if (node.children === undefined) {
+        return [node.id];
+      } else {
+        return [node.id, ...node.children?.flatMap(recursiveKeys)];
+      }
+    }
+
+    const allKeys = filteredTree.flatMap(recursiveKeys);
+    setExpanded(allKeys);
+  }, [filteredTree]);
 
   return (
     <Stack>
-      <h1>Param Tree</h1>
-      <TextField id="outlined-basic" label="Search Parameters" variant="outlined" value={searchText} onChange={onFilterChange} />
       {!filteredTree && <div>Loading...</div>}
-      {filteredTree && <RichTreeView items={filteredTree} slots={{ item: TreeItem2 }} onItemSelectionToggle={handleSearchTreeItemSelect} />}
+      {filteredTree && (
+        <RichTreeView expandedItems={expanded} items={filteredTree} slots={{ item: TreeItem2 }} onItemSelectionToggle={handleSearchTreeItemSelect} />
+      )}
     </Stack>
   );
 };
-
-export default SearchTree;

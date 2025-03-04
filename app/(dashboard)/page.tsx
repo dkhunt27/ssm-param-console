@@ -6,8 +6,9 @@ import { useSsmParam } from '@/app/hooks';
 import { MouseEventHandler, useEffect, useState } from 'react';
 import { useNotifications } from '@toolpad/core/useNotifications';
 import { Grid2 } from '@mui/material';
-import SearchTree from '@/app/components/searchTree/search-tree';
-import ParamTable from '@/app/components/paramTable/param-table';
+import { ParamTree } from '@/app/components/paramTree/param-tree';
+import { ParamTable } from '@/app/components/paramTable/param-table';
+import { ParamFilter } from '@/app/components/paramFilter/param-filter';
 import { useAtomValue } from 'jotai';
 import { pathDelimiterAtom } from '@/app/store';
 import { stripTrailingPathDelimiter } from '@/app/utils';
@@ -21,7 +22,7 @@ export default function DashboardPage() {
   const [parametersLoading, setParametersLoading] = useState(false);
   const [paramNames, setParamNames] = useState<string[]>([]);
   const [parameters, setParameters] = useState<Parameter[]>([]);
-  const [tableFilter, setTableFilter] = useState('');
+  const [filterText, setFilterText] = useState('');
 
   useEffect(() => {
     setParametersLoading(true);
@@ -67,21 +68,24 @@ export default function DashboardPage() {
 
   const handleSearchTreeItemSelect = (_event: React.SyntheticEvent, itemId: string, isSelected: boolean) => {
     if (isSelected) {
-      setTableFilter(stripTrailingPathDelimiter(itemId, pathDelimiter));
+      setFilterText(stripTrailingPathDelimiter(itemId, pathDelimiter));
     }
   };
 
   const handleParamBreadcrumbSelect = (path: string): void => {
-    setTableFilter(path);
+    setFilterText(path);
   };
 
   return (
     <Grid2 container spacing={2}>
+      <Grid2 size={12}>
+        <ParamFilter filterText={filterText} setFilterText={setFilterText} />
+      </Grid2>
       <Grid2 size={4}>
-        <SearchTree paramNames={paramNames} handleSearchTreeItemSelect={handleSearchTreeItemSelect} />
+        <ParamTree filterText={filterText} paramNames={paramNames} handleSearchTreeItemSelect={handleSearchTreeItemSelect} />
       </Grid2>
       <Grid2 size={8}>
-        <ParamTable parameters={parameters} tableFilter={tableFilter} handleParamBreadcrumbSelect={handleParamBreadcrumbSelect} />
+        <ParamTable filterText={filterText} parameters={parameters} handleParamBreadcrumbSelect={handleParamBreadcrumbSelect} />
       </Grid2>
     </Grid2>
   );

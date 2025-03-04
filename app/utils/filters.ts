@@ -178,7 +178,7 @@ export const filterTree = (tree: TreeViewBaseItem[], filter: string): TreeViewBa
   return tree.reduce((results, node) => {
     let filteredNode = null;
 
-    if (node.label.toLowerCase().includes(filter.toLowerCase())) {
+    if (node.id.toLowerCase().includes(filter.toLowerCase())) {
       filteredNode = { ...node };
     }
 

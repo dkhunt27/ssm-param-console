@@ -1,35 +1,29 @@
-import { Box, Button, Breadcrumbs, Link, Typography } from '@mui/material';
-import { MouseEventHandler, ReactElement, useEffect, useState } from 'react';
+import { Breadcrumbs, Link, Typography, Stack } from '@mui/material';
+import { ReactElement, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useAtomValue } from 'jotai';
 import { showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom, pathDelimiterAtom } from '@/app/store';
 import { Parameter } from '@aws-sdk/client-ssm';
 
-import { useDemoData } from '@mui/x-data-grid-generator';
-
 type PropsType = {
   parameters: Parameter[];
-  tableFilter: string;
+  filterText: string;
   handleParamBreadcrumbSelect: (path: string) => void;
 };
 
-const ParamTable = (props: PropsType): ReactElement => {
-  const { parameters, tableFilter, handleParamBreadcrumbSelect } = props;
-  const { data, loading } = useDemoData({
-    dataSet: 'Employee',
-    rowLength: 1000,
-    treeData: { maxDepth: 2, groupingField: 'name', averageChildren: 200 },
-  });
+export const ParamTable = (props: PropsType): ReactElement => {
+  const { parameters, filterText, handleParamBreadcrumbSelect } = props;
+
   const [filteredTableRows, setFilteredTableRows] = useState(parameters);
 
   useEffect(() => {
-    if (tableFilter) {
-      const filteredRows = parameters.filter((param) => param.Name?.includes(tableFilter));
+    if (filterText) {
+      const filteredRows = parameters.filter((param) => param.Name?.includes(filterText));
       setFilteredTableRows(filteredRows);
     } else {
       setFilteredTableRows(parameters);
     }
-  }, [tableFilter, parameters]);
+  }, [filterText, parameters]);
 
   const pathDelimiter = useAtomValue(pathDelimiterAtom);
   const showDescription = useAtomValue(showDescriptionAtom);
@@ -165,30 +159,25 @@ const ParamTable = (props: PropsType): ReactElement => {
   });
 
   return (
-    <div>
-      <h1>Param Table</h1>
-      <h3>Filter: {tableFilter}</h3>
-      <Box sx={{ height: 400, width: '100%' }}>
-        {filteredTableRows && filteredTableRows.length > 0 && (
-          <DataGrid
-            rows={filteredTableRows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
+    <Stack>
+      {!filteredTableRows && <div>Loading...</div>}
+      {filteredTableRows && filteredTableRows.length > 0 && (
+        <DataGrid
+          rows={filteredTableRows}
+          columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                pageSize: 5,
               },
-            }}
-            pageSizeOptions={[5]}
-            checkboxSelection
-            disableRowSelectionOnClick
-            getRowId={(row) => row.ARN as string}
-          />
-        )}
-      </Box>
-    </div>
+            },
+          }}
+          pageSizeOptions={[5]}
+          checkboxSelection
+          disableRowSelectionOnClick
+          getRowId={(row) => row.ARN as string}
+        />
+      )}
+    </Stack>
   );
 };
-
-export default ParamTable;
