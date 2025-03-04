@@ -18,10 +18,12 @@
     "@mui/material-nextjs": "^6",
     "@mui/x-tree-view": "^7.26.0",
     "@toolpad/core": "^0.12.1",
+    "javascript-time-ago": "^2.5.11",
     "jotai": "^2.12.0",
     "next": "^15",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "react-time-ago": "^7.3.3"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",

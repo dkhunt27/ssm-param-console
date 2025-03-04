@@ -1,9 +1,19 @@
-import { Breadcrumbs, Link, Typography, Stack } from '@mui/material';
+import { Breadcrumbs, Link, Typography, Stack, IconButton } from '@mui/material';
 import { ReactElement, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { useAtomValue } from 'jotai';
 import { showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom, pathDelimiterAtom } from '@/app/store';
 import { Parameter } from '@aws-sdk/client-ssm';
+import { valueIsJson } from '@/app/utils/json';
+import { Copyable } from '@/app/components/copyable/copyable';
+import CopyAllOutlinedIcon from '@mui/icons-material/CopyAllOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import ReactTimeAgo from 'react-time-ago';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en';
+TimeAgo.addDefaultLocale(en);
+TimeAgo.addLocale(en);
 
 type PropsType = {
   parameters: Parameter[];
@@ -42,7 +52,8 @@ export const ParamTable = (props: PropsType): ReactElement => {
     {
       field: 'Name',
       headerName: 'Name',
-      width: 300,
+      minWidth: 330,
+      flex: 1,
       sortable: true,
       renderCell: (params) => {
         const paths = params.value.split(pathDelimiter);
@@ -63,53 +74,53 @@ export const ParamTable = (props: PropsType): ReactElement => {
           );
         });
         return (
-          <span style={{ wordBreak: 'break-word' }}>
-            <Breadcrumbs>{breadCrumbItems}</Breadcrumbs>
-          </span>
+          <Copyable value={params.value}>
+            <span style={{ wordBreak: 'break-word' }}>
+              <Breadcrumbs>{breadCrumbItems}</Breadcrumbs>
+            </span>
+          </Copyable>
         );
       },
     },
     {
       field: 'Value',
       headerName: 'Value',
-      width: valueWidth,
-      // render: (value: any) => {
-      //   let useJsonInput = valueIsJson(value);
-      //   if (useJsonInput) {
-      //     return (
-      //       <JSONInput
-      //         placeholder={JSON.parse(value)}
-      //         viewOnly
-      //         theme="light_mitsuketa_tribute"
-      //         locale={locale}
-      //         height="150px"
-      //         width={`${valueWidth - 25}px`}
-      //         confirmGood={false}
-      //       />
-      //     );
-      //   }
-      //   return (
-      //     <Paragraph style={{ wordBreak: 'break-word' }} copyable>
-      //       {value}
-      //     </Paragraph>
-      //   );
-      // },
+      minWidth: valueWidth,
+      flex: 1,
+      renderCell: (params) => {
+        const value = params.value as string;
+        let useJsonInput = valueIsJson(value);
+        if (useJsonInput) {
+          return (
+            <Copyable value={value}>
+              <pre>{JSON.stringify(JSON.parse(value), null, 2)}</pre>
+            </Copyable>
+          );
+        }
+        return (
+          <Copyable value={value}>
+            <Typography sx={{ wordBreak: 'break-word' }}>{value}</Typography>
+          </Copyable>
+        );
+      },
     },
   ];
   if (showDescription) {
     columns.push({
       field: 'Description',
       headerName: 'Description',
-      width: descWidth,
-      // render: (value: any) => {
-      //   return value ? (
-      //     <Paragraph style={{ wordBreak: 'break-word' }} copyable>
-      //       {value}
-      //     </Paragraph>
-      //   ) : (
-      //     <i>No Description</i>
-      //   );
-      // },
+      minWidth: descWidth,
+      flex: 1,
+      renderCell: (params) => {
+        const value = params.value as string;
+        return value ? (
+          <Copyable value={value}>
+            <Typography sx={{ wordBreak: 'break-word' }}>{value}</Typography>
+          </Copyable>
+        ) : (
+          <i>No Description</i>
+        );
+      },
     });
   }
 
@@ -117,7 +128,8 @@ export const ParamTable = (props: PropsType): ReactElement => {
     columns.push({
       field: 'Type',
       headerName: 'Type',
-      width: typeWidth,
+      minWidth: typeWidth,
+      flex: 1,
     });
   }
 
@@ -125,37 +137,50 @@ export const ParamTable = (props: PropsType): ReactElement => {
     columns.push({
       field: 'LastModifiedDate',
       headerName: 'LastModifiedDate',
-      width: modifiedWidth,
+      minWidth: modifiedWidth,
+      flex: 1,
       sortable: true,
-      // render: (date: number | Date) => (
-      //   <span>
-      //     {<ReactTimeAgo date={date} />} ({date.toLocaleString()})
-      //   </span>
-      // ),
+
+      renderCell: (params) => {
+        const value = params.value as number | Date;
+        return (
+          <span>
+            {<ReactTimeAgo date={value} timeStyle="round" />} ({value.toLocaleString()})
+          </span>
+        );
+      },
     });
   }
 
   columns.push({
     field: 'Actions',
     headerName: 'Actions',
-    width: 125,
-    // fixed: 'right',
-    // render: (e: any) => {
-    //   const currentData = {
-    //     name: e.Name,
-    //     description: e.Description,
-    //     type: e.Type,
-    //     value: e.Value,
-    //     kmsKey: e.KeyId,
-    //   };
-    //   return (
-    //     <Layout>
-    //       <CreationFormButton buttonText="Edit" modalText="Edit" initialFormData={currentData} resetOnClose editFlow />
-    //       <CreationFormButton buttonColor="primary" buttonText="Duplicate" initialFormData={currentData} resetOnClose />
-    //       <DeleteButton name={e.Name} onDelete={deleteParameter} />
-    //     </Layout>
-    //   );
-    // },
+    width: 150,
+    renderCell: (params) => {
+      // const currentData = {
+      //   name: e.Name,
+      //   description: e.Description,
+      //   type: e.Type,
+      //   value: e.Value,
+      //   kmsKey: e.KeyId,
+      // };
+      return (
+        <Stack direction={'row'} spacing={1}>
+          <IconButton aria-label="edit">
+            <EditOutlinedIcon />
+          </IconButton>
+          <IconButton aria-label="duplicate">
+            <CopyAllOutlinedIcon />
+          </IconButton>
+          <IconButton aria-label="delete">
+            <DeleteOutlineIcon />
+          </IconButton>
+          {/* <CreationFormButton buttonText="Edit" modalText="Edit" initialFormData={currentData} resetOnClose editFlow />
+          <CreationFormButton buttonColor="primary" buttonText="Duplicate" initialFormData={currentData} resetOnClose />
+          <DeleteButton name={e.Name} onDelete={deleteParameter} /> */}
+        </Stack>
+      );
+    },
   });
 
   return (
@@ -176,7 +201,6 @@ export const ParamTable = (props: PropsType): ReactElement => {
           checkboxSelection
           disableRowSelectionOnClick
           getRowId={(row) => row.ARN as string}
-          style={{ flexGrow: 1 }}
         />
       )}
     </Stack>

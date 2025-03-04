@@ -4219,6 +4219,13 @@ iterator.prototype@^1.1.4:
     has-symbols "^1.1.0"
     set-function-name "^2.0.2"
 
+javascript-time-ago@^2.5.11:
+  version "2.5.11"
+  resolved "https://registry.yarnpkg.com/javascript-time-ago/-/javascript-time-ago-2.5.11.tgz#f2743040ccdec603cb4ec1029eeccb0c595c942a"
+  integrity sha512-Zeyf5R7oM1fSMW9zsU3YgAYwE0bimEeF54Udn2ixGd8PUwu+z1Yc5t4Y8YScJDMHD6uCx6giLt3VJR5K4CMwbg==
+  dependencies:
+    relative-time-format "^1.1.6"
+
 jest-changed-files@^29.7.0:
   version "29.7.0"
   resolved "https://registry.npmjs.org/jest-changed-files/-/jest-changed-files-29.7.0.tgz"
@@ -4804,6 +4811,11 @@ math-intrinsics@^1.1.0:
   resolved "https://registry.npmjs.org/math-intrinsics/-/math-intrinsics-1.1.0.tgz"
   integrity sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==
 
+memoize-one@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-6.0.0.tgz#b2591b871ed82948aee4727dc6abceeeac8c1045"
+  integrity sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==
+
 merge-stream@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/merge-stream/-/merge-stream-2.0.0.tgz"
@@ -5146,6 +5158,11 @@ path-type@^4.0.0:
   resolved "https://registry.npmjs.org/path-type/-/path-type-4.0.0.tgz"
   integrity sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==
 
+performance-now@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
+  integrity sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==
+
 picocolors@^1.0.0, picocolors@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/picocolors/-/picocolors-1.1.1.tgz"
@@ -5259,6 +5276,13 @@ queue-microtask@^1.2.2:
   resolved "https://registry.npmjs.org/queue-microtask/-/queue-microtask-1.2.3.tgz"
   integrity sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==
 
+raf@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/raf/-/raf-3.4.1.tgz#0742e99a4a6552f445d73e3ee0328af0ff1ede39"
+  integrity sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==
+  dependencies:
+    performance-now "^2.1.0"
+
 react-dom@^19:
   version "19.0.0"
   resolved "https://registry.npmjs.org/react-dom/-/react-dom-19.0.0.tgz"
@@ -5290,6 +5314,15 @@ react-refresh@^0.14.2:
   version "0.14.2"
   resolved "https://registry.npmjs.org/react-refresh/-/react-refresh-0.14.2.tgz"
   integrity sha512-jCvmsr+1IUSMUyzOkRcvnVbX3ZYC6g9TDrDbFuFmRDq7PD4yaGbLKNQL6k2jnArV8hjYxh7hVhAZB6s9HDGpZA==
+
+react-time-ago@^7.3.3:
+  version "7.3.3"
+  resolved "https://registry.yarnpkg.com/react-time-ago/-/react-time-ago-7.3.3.tgz#d6344c6397eef5cfed1554545fb9daf5742f16df"
+  integrity sha512-5kh2Kuu/UhHzcZrGvf3GUrF2d+IXjkIXif5MR2iDWIfSqQuBW27/ejN/tmzJBRyPiryYTgbDIG6AZFJ4RW3yfw==
+  dependencies:
+    memoize-one "^6.0.0"
+    prop-types "^15.8.1"
+    raf "^3.4.1"
 
 react-transition-group@^4.4.5:
   version "4.4.5"
@@ -5344,6 +5377,11 @@ regexp.prototype.flags@^1.5.3:
     get-proto "^1.0.1"
     gopd "^1.2.0"
     set-function-name "^2.0.2"
+
+relative-time-format@^1.1.6:
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/relative-time-format/-/relative-time-format-1.1.6.tgz#724a5fbc3794b8e0471b6b61419af2ce699eb9f1"
+  integrity sha512-aCv3juQw4hT1/P/OrVltKWLlp15eW1GRcwP1XdxHrPdZE9MtgqFpegjnTjLhi2m2WI9MT/hQQtE+tjEWG1hgkQ==
 
 require-directory@^2.1.1:
   version "2.1.1"
