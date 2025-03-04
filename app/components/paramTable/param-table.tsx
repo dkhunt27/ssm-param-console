@@ -51,7 +51,7 @@ export const ParamTable = (props: PropsType): ReactElement => {
           // if last index
           if (idx === paths.length - 1) {
             return (
-              <Typography sx={{ color: 'text.primary' }} key={params.value + idx}>
+              <Typography sx={{ color: 'text.primary', fontWeight: 700 }} key={params.value + idx}>
                 {path}
               </Typography>
             );
@@ -159,7 +159,7 @@ export const ParamTable = (props: PropsType): ReactElement => {
   });
 
   return (
-    <Stack>
+    <Stack sx={{ flexGrow: 1, width: '100%' }}>
       {!filteredTableRows && <div>Loading...</div>}
       {filteredTableRows && filteredTableRows.length > 0 && (
         <DataGrid
@@ -176,6 +176,7 @@ export const ParamTable = (props: PropsType): ReactElement => {
           checkboxSelection
           disableRowSelectionOnClick
           getRowId={(row) => row.ARN as string}
+          style={{ flexGrow: 1 }}
         />
       )}
     </Stack>

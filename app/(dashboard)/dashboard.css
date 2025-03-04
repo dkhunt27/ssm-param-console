@@ -1,0 +1,11 @@
+.MuiContainer-maxWidthLg {
+  max-width: 100%;
+}
+
+.MuiGrid2-grid-xs-8 {
+  flex-grow: 1;
+}
+
+.MuiGrid2-grid-md-7 {
+  flex-grow: 1;
+}

@@ -77,14 +77,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <Grid2 container spacing={2}>
+    <Grid2 key="pageGrid" container spacing={2}>
       <Grid2 size={12}>
         <ParamFilter filterText={filterText} setFilterText={setFilterText} />
       </Grid2>
-      <Grid2 size={4}>
+      <Grid2 size={{ xs: 4, md: 3 }}>
         <ParamTree filterText={filterText} paramNames={paramNames} handleSearchTreeItemSelect={handleSearchTreeItemSelect} />
       </Grid2>
-      <Grid2 size={8}>
+      <Grid2 size={{ xs: 8, md: 7 }}>
         <ParamTable filterText={filterText} parameters={parameters} handleParamBreadcrumbSelect={handleParamBreadcrumbSelect} />
       </Grid2>
     </Grid2>
