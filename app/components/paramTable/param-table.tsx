@@ -1,6 +1,6 @@
 import { Breadcrumbs, Link, Typography, Stack, IconButton } from '@mui/material';
-import { ReactElement, useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { ReactElement, useCallback, useEffect, useState } from 'react';
+import { DataGrid, GridColDef, useGridApiRef } from '@mui/x-data-grid';
 import { useAtomValue } from 'jotai';
 import { showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom, pathDelimiterAtom } from '@/app/store';
 import { Parameter } from '@aws-sdk/client-ssm';
@@ -12,6 +12,9 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ReactTimeAgo from 'react-time-ago';
 import TimeAgo from 'javascript-time-ago';
 import en from 'javascript-time-ago/locale/en';
+import JSONInput from 'react-json-editor-ajrm';
+import locale from 'react-json-editor-ajrm/locale/en';
+
 TimeAgo.addDefaultLocale(en);
 TimeAgo.addLocale(en);
 
@@ -21,8 +24,15 @@ type PropsType = {
   handleParamBreadcrumbSelect: (path: string) => void;
 };
 
+function sleep(ms: number) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
 export const ParamTable = (props: PropsType): ReactElement => {
   const { parameters, filterText, handleParamBreadcrumbSelect } = props;
+  const apiRef = useGridApiRef();
 
   const [filteredTableRows, setFilteredTableRows] = useState(parameters);
 
@@ -34,6 +44,16 @@ export const ParamTable = (props: PropsType): ReactElement => {
       setFilteredTableRows(parameters);
     }
   }, [filterText, parameters]);
+
+  useEffect(() => {
+    if (filteredTableRows) {
+      console.log('autosizing columns');
+      apiRef.current.autosizeColumns({
+        includeHeaders: true,
+        includeOutliers: true,
+      });
+    }
+  }, [filteredTableRows]);
 
   const pathDelimiter = useAtomValue(pathDelimiterAtom);
   const showDescription = useAtomValue(showDescriptionAtom);
@@ -52,8 +72,8 @@ export const ParamTable = (props: PropsType): ReactElement => {
     {
       field: 'Name',
       headerName: 'Name',
-      minWidth: 330,
-      flex: 1,
+      //minWidth: 330,
+      //flex: 1,
       sortable: true,
       renderCell: (params) => {
         const paths = params.value.split(pathDelimiter);
@@ -75,7 +95,7 @@ export const ParamTable = (props: PropsType): ReactElement => {
         });
         return (
           <Copyable value={params.value}>
-            <span style={{ wordBreak: 'break-word' }}>
+            <span style={{ wordBreak: 'break-word', justifyContent: 'center', alignItems: 'center' }}>
               <Breadcrumbs>{breadCrumbItems}</Breadcrumbs>
             </span>
           </Copyable>
@@ -85,32 +105,39 @@ export const ParamTable = (props: PropsType): ReactElement => {
     {
       field: 'Value',
       headerName: 'Value',
-      minWidth: valueWidth,
-      flex: 1,
+      //minWidth: valueWidth,
+      //flex: 1,
       renderCell: (params) => {
         const value = params.value as string;
         let useJsonInput = valueIsJson(value);
         if (useJsonInput) {
           return (
             <Copyable value={value}>
-              <pre>{JSON.stringify(JSON.parse(value), null, 2)}</pre>
+              <JSONInput
+                placeholder={JSON.parse(value)}
+                viewOnly
+                theme="light_mitsuketa_tribute"
+                locale={locale}
+                height="150px"
+                width={`${valueWidth - 25}px`}
+                confirmGood={false}
+              />
+              {/* <pre>{JSON.stringify(JSON.parse(value), null, 2)}</pre> */}
             </Copyable>
           );
         }
         return (
           <Copyable value={value}>
-            <Typography sx={{ wordBreak: 'break-word' }}>{value}</Typography>
+            <span style={{ wordBreak: 'break-word' }}>{value}</span>
           </Copyable>
         );
       },
     },
-  ];
-  if (showDescription) {
-    columns.push({
+    {
       field: 'Description',
       headerName: 'Description',
-      minWidth: descWidth,
-      flex: 1,
+      //minWidth: descWidth,
+      //flex: 1,
       renderCell: (params) => {
         const value = params.value as string;
         return value ? (
@@ -121,24 +148,18 @@ export const ParamTable = (props: PropsType): ReactElement => {
           <i>No Description</i>
         );
       },
-    });
-  }
-
-  if (showType) {
-    columns.push({
+    },
+    {
       field: 'Type',
       headerName: 'Type',
-      minWidth: typeWidth,
-      flex: 1,
-    });
-  }
-
-  if (showLastModifiedDate) {
-    columns.push({
+      //minWidth: typeWidth,
+      //flex: 1,
+    },
+    {
       field: 'LastModifiedDate',
       headerName: 'LastModifiedDate',
-      minWidth: modifiedWidth,
-      flex: 1,
+      //minWidth: modifiedWidth,
+      //flex: 1,
       sortable: true,
 
       renderCell: (params) => {
@@ -149,48 +170,55 @@ export const ParamTable = (props: PropsType): ReactElement => {
           </span>
         );
       },
-    });
-  }
-
-  columns.push({
-    field: 'Actions',
-    headerName: 'Actions',
-    width: 150,
-    renderCell: (params) => {
-      // const currentData = {
-      //   name: e.Name,
-      //   description: e.Description,
-      //   type: e.Type,
-      //   value: e.Value,
-      //   kmsKey: e.KeyId,
-      // };
-      return (
-        <Stack direction={'row'} spacing={1}>
-          <IconButton aria-label="edit">
-            <EditOutlinedIcon />
-          </IconButton>
-          <IconButton aria-label="duplicate">
-            <CopyAllOutlinedIcon />
-          </IconButton>
-          <IconButton aria-label="delete">
-            <DeleteOutlineIcon />
-          </IconButton>
-          {/* <CreationFormButton buttonText="Edit" modalText="Edit" initialFormData={currentData} resetOnClose editFlow />
+    },
+    {
+      field: 'Actions',
+      headerName: 'Actions',
+      //width: 150,
+      renderCell: (params) => {
+        // const currentData = {
+        //   name: e.Name,
+        //   description: e.Description,
+        //   type: e.Type,
+        //   value: e.Value,
+        //   kmsKey: e.KeyId,
+        // };
+        return (
+          <Stack direction={'row'} spacing={1}>
+            <IconButton aria-label="edit">
+              <EditOutlinedIcon />
+            </IconButton>
+            <IconButton aria-label="duplicate">
+              <CopyAllOutlinedIcon />
+            </IconButton>
+            <IconButton aria-label="delete">
+              <DeleteOutlineIcon />
+            </IconButton>
+            {/* <CreationFormButton buttonText="Edit" modalText="Edit" initialFormData={currentData} resetOnClose editFlow />
           <CreationFormButton buttonColor="primary" buttonText="Duplicate" initialFormData={currentData} resetOnClose />
           <DeleteButton name={e.Name} onDelete={deleteParameter} /> */}
-        </Stack>
-      );
+          </Stack>
+        );
+      },
     },
-  });
+  ];
 
   return (
-    <Stack sx={{ flexGrow: 1, width: '100%' }}>
+    <Stack sx={{ flexGrow: 1, width: '100%', height: '80vh' }}>
       {!filteredTableRows && <div>Loading...</div>}
       {filteredTableRows && filteredTableRows.length > 0 && (
         <DataGrid
+          apiRef={apiRef}
           rows={filteredTableRows}
           columns={columns}
           initialState={{
+            columns: {
+              columnVisibilityModel: {
+                Type: showType,
+                Description: showDescription,
+                LastModifiedDate: showLastModifiedDate,
+              },
+            },
             pagination: {
               paginationModel: {
                 pageSize: 5,
@@ -200,7 +228,9 @@ export const ParamTable = (props: PropsType): ReactElement => {
           pageSizeOptions={[5]}
           checkboxSelection
           disableRowSelectionOnClick
+          disableAutosize={false}
           getRowId={(row) => row.ARN as string}
+          autoPageSize={true}
         />
       )}
     </Stack>

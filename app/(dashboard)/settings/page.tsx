@@ -6,11 +6,13 @@ import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Switch from '@mui/material/Switch';
 import { useAtom } from 'jotai';
-import { pathDelimiterAtom, showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom } from '@/app/store';
+import { awsRegionAtom, startingPathAtom, pathDelimiterAtom, showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom } from '@/app/store';
 import { FormControlLabel } from '@mui/material';
 import { useEffect, useState } from 'react';
 
 export default function SettingsPage() {
+  const [awsRegion, setAwsRegion] = useAtom(awsRegionAtom);
+  const [startingPath, setStartingPath] = useAtom(startingPathAtom);
   const [pathDelimiter, setPathDelimiter] = useAtom(pathDelimiterAtom);
   const [showDescription, setShowDescription] = useAtom(showDescriptionAtom);
   const [showLastModifiedDate, setShowLastModifiedDate] = useAtom(showLastModifiedDateAtom);
@@ -46,7 +48,15 @@ export default function SettingsPage() {
   return (
     <Stack direction="column" spacing={2}>
       <Stack direction="row" spacing={2}>
-        <TextField value={pathDelimiter} onChange={(event) => setPathDelimiter(event.target.value)} placeholder="Param path delimiter" />
+        <TextField value={awsRegion} onChange={(event) => setAwsRegion(event.target.value)} label="AWS Region" />
+        <Button onClick={() => setAwsRegion('')}>Clear</Button>
+      </Stack>
+      <Stack direction="row" spacing={2}>
+        <TextField value={startingPath} onChange={(event) => setStartingPath(event.target.value)} label="Parameters Starting Path" />
+        <Button onClick={() => setStartingPath('')}>Clear</Button>
+      </Stack>
+      <Stack direction="row" spacing={2}>
+        <TextField value={pathDelimiter} onChange={(event) => setPathDelimiter(event.target.value)} label="Parameter Path Delimiter" />
         <Button onClick={() => setPathDelimiter('')}>Clear</Button>
       </Stack>
       <Stack direction="row" spacing={2}>

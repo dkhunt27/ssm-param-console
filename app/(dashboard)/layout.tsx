@@ -1,13 +1,23 @@
+'use client';
+
 import * as React from 'react';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
 import { PageContainer } from '@toolpad/core/PageContainer';
 import { PageHeader } from '../components/pageHeader/page-header';
 import './dashboard.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Provider } from 'jotai';
 
 export default function Layout(props: { children: React.ReactNode }) {
+  const queryClient = new QueryClient();
+
   return (
-    <DashboardLayout defaultSidebarCollapsed={true}>
-      <PageContainer slots={{ header: PageHeader }}>{props.children}</PageContainer>
-    </DashboardLayout>
+    <Provider>
+      <QueryClientProvider client={queryClient}>
+        <DashboardLayout defaultSidebarCollapsed={true}>
+          <PageContainer slots={{ header: PageHeader }}>{props.children}</PageContainer>
+        </DashboardLayout>
+      </QueryClientProvider>
+    </Provider>
   );
 }
