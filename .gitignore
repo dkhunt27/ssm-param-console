@@ -61,3 +61,5 @@ Thumbs.db
 .nx/cache
 .nx/workspace-data
 .aider*
+
+app/data.secrets.ts
