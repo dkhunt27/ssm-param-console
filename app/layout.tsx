@@ -23,6 +23,12 @@ const NAVIGATION: Navigation = [
     title: 'Settings',
     icon: <SettingsIcon />,
   },
+  {
+    segment: 'params',
+    title: 'Params',
+    icon: <SettingsIcon />,
+    pattern: 'params{/:id}*',
+  },
 ];
 
 const BRANDING = {

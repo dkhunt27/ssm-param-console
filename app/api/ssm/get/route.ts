@@ -1,5 +1,6 @@
 import { GetParametersByPathCommandInput, Parameter } from '@aws-sdk/client-ssm';
 import { getAllParameters } from '../ssm-utils';
+import { writeFileSync } from 'fs';
 
 export async function POST(request: Request) {
   const req = await request.json();
@@ -15,6 +16,7 @@ export async function POST(request: Request) {
   let data: Parameter[] = [];
   try {
     data = await getAllParameters({ input });
+    // writeFileSync('./data.json', JSON.stringify(data, null, 2)); // TODO: remove this line
   } catch (err) {
     console.log('Error trying to getAllParameters', err);
     throw err;

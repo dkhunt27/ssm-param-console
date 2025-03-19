@@ -1,30 +1,12 @@
-import {
-  DescribeParametersCommand,
-  DescribeParametersCommandInput,
-  GetParametersCommand,
-  GetParametersCommandInput,
-  Parameter,
-  ParameterMetadata,
-  SSMClient,
-} from '@aws-sdk/client-ssm';
-import { describeResults, getResults } from '@/app/data';
-import { useAtomValue } from 'jotai';
-import { startingPathAtom } from './store';
-import { useNotifications } from '@toolpad/core/useNotifications';
+import { Parameter } from '@aws-sdk/client-ssm';
 import { get as _get } from 'lodash';
-import { DescribedParamType } from './types';
-import { useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
+import { useQuery, UseQueryResult } from '@tanstack/react-query';
+import { getResults } from '@/app/data';
 
 type FetchWrapperInputsType = {
   url: string;
   hookKey: string;
   options?: RequestInit;
-};
-
-type SsmParamResultType = {
-  status: 'idle' | 'error' | 'loading' | 'success';
-  data?: Parameter[] | undefined;
-  error?: Error | undefined | null;
 };
 
 const fetchWrapper = async <TResponse>({ url, hookKey, options }: FetchWrapperInputsType): Promise<TResponse> => {
@@ -54,7 +36,7 @@ const fetchWrapper = async <TResponse>({ url, hookKey, options }: FetchWrapperIn
   }
 };
 
-export const useSsmParam = (startingPath: string): UseQueryResult<Parameter[], Error> => {
+export const useSsmParamReal = (startingPath: string): UseQueryResult<Parameter[], Error> => {
   const queryResults = useQuery<Parameter[], Error, Parameter[]>({
     queryKey: [startingPath],
     queryFn: () => {
@@ -101,53 +83,6 @@ export const useSsmParam = (startingPath: string): UseQueryResult<Parameter[], E
   return queryResults;
 };
 
-export const useSsmParamOld = () => {
-  const startingPath = useAtomValue(startingPathAtom);
-
-  const describeParameters = async (): Promise<DescribedParamType[]> => {
-    const data = await fetchWrapper<DescribedParamType[]>({
-      url: '/api/ssm/describe',
-      hookKey: 'describeParameters',
-      options: {
-        method: 'POST',
-        body: JSON.stringify({ startingPath }),
-      },
-    });
-
-    return data;
-  };
-
-  const getParameters = async (names: string[]): Promise<DescribedParamType[]> => {
-    const data = await fetchWrapper<DescribedParamType[]>({
-      url: '/api/ssm/get',
-      hookKey: 'getParameters',
-      options: {
-        method: 'POST',
-        body: JSON.stringify({ paramNames: names }),
-      },
-    });
-
-    return data;
-  };
-
-  return { describeParameters, getParameters };
-};
-
-export const useSsmParamMock = () => {
-  const describeParameters = async (): Promise<ParameterMetadata[]> => {
-    console.log('describeParameters fetching');
-    try {
-      return describeResults.Parameters ?? [];
-    } catch (err) {
-      console.error('Error trying to describeParameters', err);
-      throw err;
-    }
-  };
-
-  const getParameters = async (names: string[]): Promise<Parameter[]> => {
-    console.log('getParameters fetching');
-    return getResults.Parameters ?? [];
-  };
-
-  return { describeParameters, getParameters };
+export const useSsmParam = (startingPath: string): UseQueryResult<Parameter[], Error> => {
+  return { data: getResults, error: null, isLoading: false } as never;
 };

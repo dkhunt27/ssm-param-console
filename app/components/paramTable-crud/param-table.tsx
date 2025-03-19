@@ -1,4 +1,4 @@
-import { Breadcrumbs, Link, Typography, Stack, IconButton, Modal, Box, Button, Divider } from '@mui/material';
+import { Breadcrumbs, Link, Typography, Stack, IconButton, Modal, Box } from '@mui/material';
 import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { DataGrid, GridColDef, useGridApiRef } from '@mui/x-data-grid';
 import { useAtomValue } from 'jotai';
@@ -29,7 +29,7 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 700,
+  width: 400,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -50,8 +50,6 @@ export const ParamTable = (props: PropsType): ReactElement => {
   const router = useDemoRouter('/params');
 
   const [filteredTableRows, setFilteredTableRows] = useState(parameters);
-  const [actionItem, setActionItem] = useState<Parameter | undefined>();
-  const [modalTitle, setModalTitle] = useState<string>('');
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -85,14 +83,6 @@ export const ParamTable = (props: PropsType): ReactElement => {
   valueWidth += showDescription ? 0 : descWidth;
   valueWidth += showLastModifiedDate ? 0 : modifiedWidth;
   valueWidth += showType ? 0 : typeWidth;
-
-  const handleEditClick = (arn: string) => {
-    console.log('edit clicked', arn);
-    const found = parameters.find((p) => p.ARN === arn);
-    setModalTitle('Edit Parameter');
-    setActionItem(found);
-    setOpen(true);
-  };
 
   const columns: GridColDef<Parameter>[] = [
     {
@@ -202,9 +192,16 @@ export const ParamTable = (props: PropsType): ReactElement => {
       headerName: 'Actions',
       //width: 150,
       renderCell: (params) => {
+        // const currentData = {
+        //   name: e.Name,
+        //   description: e.Description,
+        //   type: e.Type,
+        //   value: e.Value,
+        //   kmsKey: e.KeyId,
+        // };
         return (
           <Stack direction={'row'} spacing={1}>
-            <IconButton aria-label="edit" onClick={() => handleEditClick(params.id as string)}>
+            <IconButton aria-label="edit" onClick={() => setOpen(true)}>
               <EditOutlinedIcon />
             </IconButton>
             <IconButton aria-label="duplicate">
@@ -245,41 +242,45 @@ export const ParamTable = (props: PropsType): ReactElement => {
     <Stack sx={{ flexGrow: 1, width: '100%', height: '80vh' }}>
       {!filteredTableRows && <div>Loading...</div>}
       {filteredTableRows && filteredTableRows.length > 0 && (
-        <DataGrid
-          apiRef={apiRef}
-          rows={filteredTableRows}
-          columns={columns}
-          initialState={{
-            columns: {
-              columnVisibilityModel: {
-                Type: showType,
-                Description: showDescription,
-                LastModifiedDate: showLastModifiedDate,
-              },
-            },
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-          disableAutosize={false}
-          getRowId={(row) => row.ARN as string}
-          autoPageSize={true}
+        // <DataGrid
+        //   apiRef={apiRef}
+        //   rows={filteredTableRows}
+        //   columns={columns}
+        //   initialState={{
+        //     columns: {
+        //       columnVisibilityModel: {
+        //         Type: showType,
+        //         Description: showDescription,
+        //         LastModifiedDate: showLastModifiedDate,
+        //       },
+        //     },
+        //     pagination: {
+        //       paginationModel: {
+        //         pageSize: 5,
+        //       },
+        //     },
+        //   }}
+        //   pageSizeOptions={[5]}
+        //   checkboxSelection
+        //   disableRowSelectionOnClick
+        //   disableAutosize={false}
+        //   getRowId={(row) => row.ARN as string}
+        //   autoPageSize={true}
+        // />
+
+        <Crud<ParamType>
+          dataSource={paramsDataSource}
+          dataSourceCache={paramsCache}
+          rootPath="/params"
+          initialPageSize={10}
+          defaultValues={{ name: 'New param' }}
         />
       )}
-      <Modal title={modalTitle} open={open} onClose={handleClose}>
-        <Stack spacing={2} sx={modalStyle}>
-          <Typography id="modal-modal-title" variant="h5" component="h5">
-            {modalTitle}
-          </Typography>
-          <Divider />
-          <ParamForm param={actionItem} setOpen={setOpen} />
-        </Stack>
-      </Modal>
+      {/* <Modal open={open} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          <ParamForm param={} />
+        </Box>
+      </Modal> */}
     </Stack>
   );
 };
