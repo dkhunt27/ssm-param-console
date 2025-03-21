@@ -1,5 +1,6 @@
 import { Control, Controller, FieldValues, Path, PathValue } from 'react-hook-form';
-import { FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
+import { FormControlLabel, FormLabel, Radio, RadioGroup, SelectChangeEvent } from '@mui/material';
+import { useEffect, useState } from 'react';
 
 type PropsType<T extends FieldValues> = {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -17,31 +18,40 @@ type PropsType<T extends FieldValues> = {
 
 export const FormControlInputRadioGroup = <T extends object>(props: PropsType<T>): JSX.Element => {
   const { id, control, row, options, fieldName, defaultValue, rules, label } = props;
+  const [selected, setSelected] = useState<T | undefined>(undefined);
+
+  useEffect(() => {
+    if (defaultValue) {
+      setSelected(defaultValue);
+    }
+  }, [defaultValue]);
 
   return (
     <Controller
       control={control}
-      render={({ field: { onChange, onBlur, value } }) => {
+      render={({ field: { onChange, onBlur } }) => {
         return (
           <>
-            {label && <FormLabel id='demo-row-radio-buttons-group-label'>{label}</FormLabel>}
+            {label && <FormLabel id="demo-row-radio-buttons-group-label">{label}</FormLabel>}
             <RadioGroup
               id={id}
               row={row}
-              value={value}
+              value={selected}
               onBlur={onBlur}
-              onChange={val => {
-                onChange(val);
+              onChange={(event: SelectChangeEvent<typeof selected>) => {
+                const {
+                  target: { value },
+                } = event;
+
+                console.log('value', value);
+
+                setSelected(value as T | undefined);
+
+                // onChange(value);
               }}
             >
-              {options.map(opt => (
-                <FormControlLabel
-                  value={opt.value}
-                  control={<Radio />}
-                  label={opt.label}
-                  disabled={opt.disabled}
-                  key={`option${opt.value}`}
-                />
+              {options.map((opt) => (
+                <FormControlLabel value={opt.value} control={<Radio />} label={opt.label} disabled={opt.disabled} key={`option${opt.value}`} />
               ))}
             </RadioGroup>
           </>

@@ -5,7 +5,6 @@ import { useAtomValue } from 'jotai';
 import { ReactElement, useEffect, useState } from 'react';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { TreeViewBaseItem, TreeViewItemId } from '@mui/x-tree-view/models';
-import { TreeItem2 } from '@mui/x-tree-view/TreeItem2';
 import { styled, alpha } from '@mui/material/styles';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 
@@ -42,13 +41,14 @@ const CustomTreeItem = styled(TreeItem)(({ theme }) => ({
 }));
 
 type PropsType = {
+  startingPath: string;
   paramNames: string[];
   filterText: string;
   handleSearchTreeItemSelect: (event: React.SyntheticEvent, itemId: string, isSelected: boolean) => void;
 };
 
 export const ParamTree = (props: PropsType): ReactElement => {
-  const { filterText, paramNames, handleSearchTreeItemSelect } = props;
+  const { startingPath, filterText, paramNames, handleSearchTreeItemSelect } = props;
 
   const pathDelimiter = useAtomValue(pathDelimiterAtom);
   const [expanded, setExpanded] = useState<string[]>([]);
@@ -85,6 +85,11 @@ export const ParamTree = (props: PropsType): ReactElement => {
   //   setExpanded(allKeys);
   // }, [filteredTree]);
 
+  useEffect(() => {
+    const parentIds = findParentIds(startingPath);
+    setExpanded([...parentIds, startingPath]);
+  }, [unfilteredTree]);
+
   const getAllItemsWithChildrenItemIds = () => {
     const itemIds: TreeViewItemId[] = [];
     const registerItemId = (item: TreeViewBaseItem) => {
@@ -99,15 +104,15 @@ export const ParamTree = (props: PropsType): ReactElement => {
     return itemIds;
   };
 
-  const handleExpandedItemsChange = (event: React.SyntheticEvent, itemIds: string[]) => {
-    console.log('expanded:', expanded);
-    // console.log('itemIds:', itemIds);
-    // setExpanded(itemIds);
-  };
+  // const handleExpandedItemsChange = (event: React.SyntheticEvent, itemIds: string[]) => {
+  //   console.log('expanded:', expanded);
+  //   // console.log('itemIds:', itemIds);
+  //   // setExpanded(itemIds);
+  // };
 
-  const handleExpandClick = () => {
-    setExpanded((oldExpanded) => (oldExpanded.length === 0 ? getAllItemsWithChildrenItemIds() : []));
-  };
+  // const handleExpandClick = () => {
+  //   setExpanded((oldExpanded) => (oldExpanded.length === 0 ? getAllItemsWithChildrenItemIds() : []));
+  // };
 
   const findParentIds = (itemId: string): string[] => {
     const parts = itemId.split('/');
@@ -140,7 +145,7 @@ export const ParamTree = (props: PropsType): ReactElement => {
       {unfilteredTree && (
         <RichTreeView
           expandedItems={expanded}
-          onExpandedItemsChange={handleExpandedItemsChange}
+          // onExpandedItemsChange={handleExpandedItemsChange}
           items={unfilteredTree}
           slots={{ item: CustomTreeItem }}
           onItemSelectionToggle={handleSearchTreeItemSelect}

@@ -30,6 +30,7 @@
     "@toolpad/core": "^0.13.0",
     "javascript-time-ago": "^2.5.11",
     "jotai": "^2.12.0",
+    "json-edit-react": "^1.23.1",
     "lodash": "^4.17.21",
     "next": "^15",
     "react": "^18",

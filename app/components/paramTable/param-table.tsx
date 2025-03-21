@@ -1,9 +1,8 @@
-import { Breadcrumbs, Link, Typography, Stack, IconButton, Modal, Box, Button, Divider } from '@mui/material';
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { Breadcrumbs, Link, Typography, Stack, IconButton, Modal, Divider, Fab, TextField, Box } from '@mui/material';
+import { ReactElement, useEffect, useState } from 'react';
 import { DataGrid, GridColDef, useGridApiRef } from '@mui/x-data-grid';
 import { useAtomValue } from 'jotai';
 import { showDescriptionAtom, showLastModifiedDateAtom, showTypeAtom, pathDelimiterAtom } from '@/app/store';
-import { Parameter } from '@aws-sdk/client-ssm';
 import { valueIsJson } from '@/app/utils/json';
 import { Copyable } from '@/app/components/copyable/copyable';
 import CopyAllOutlinedIcon from '@mui/icons-material/CopyAllOutlined';
@@ -12,51 +11,26 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import ReactTimeAgo from 'react-time-ago';
 import JSONInput from 'react-json-editor-ajrm';
 import locale from 'react-json-editor-ajrm/locale/en';
-import { ParamForm } from '../paramForm/param-form';
-import { Crud, DataSourceCache } from '@toolpad/core/Crud';
-import { paramsDataSource } from './data-source';
 import { ParamType } from '@/app/types';
-import { useDemoRouter } from '@toolpad/core/internal';
 
 type PropsType = {
-  parameters: Parameter[];
+  parameters: ParamType[];
   filterText: string;
   handleParamBreadcrumbSelect: (path: string) => void;
+  handleEditClick: (name: string) => void;
+  handleDuplicateClick: (name: string) => void;
+  handleDeleteClick: (name: string) => void;
 };
-
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 700,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
-const paramsCache = new DataSourceCache();
-
-function matchPath(pattern: string, pathname: string): string | null {
-  const regex = new RegExp(`^${pattern.replace(/:[^/]+/g, '([^/]+)')}$`);
-  const match = pathname.match(regex);
-  return match ? match[1] : null;
-}
 
 export const ParamTable = (props: PropsType): ReactElement => {
-  const { parameters, filterText, handleParamBreadcrumbSelect } = props;
+  const { parameters, filterText, handleParamBreadcrumbSelect, handleEditClick, handleDuplicateClick, handleDeleteClick } = props;
   const apiRef = useGridApiRef();
-  const router = useDemoRouter('/params');
-
   const [filteredTableRows, setFilteredTableRows] = useState(parameters);
-  const [actionItem, setActionItem] = useState<Parameter | undefined>();
-  const [modalTitle, setModalTitle] = useState<string>('');
-  const [open, setOpen] = useState(false);
+  const [colWidthValue, setColWidthValue] = useState<number>(-1);
 
   useEffect(() => {
     if (filterText) {
-      const filteredRows = parameters.filter((param) => param.Name?.includes(filterText));
+      const filteredRows = parameters.filter((param) => param.name?.includes(filterText));
       setFilteredTableRows(filteredRows);
     } else {
       setFilteredTableRows(parameters);
@@ -70,6 +44,10 @@ export const ParamTable = (props: PropsType): ReactElement => {
   //       includeHeaders: true,
   //       includeOutliers: true,
   //     });
+
+  //     const col = apiRef.current.getColumn('value');
+  //     console.log('col', col);
+  //     setColWidthValue(col?.computedWidth || 100);
   //   }
   // }, [apiRef, filteredTableRows]);
 
@@ -78,28 +56,25 @@ export const ParamTable = (props: PropsType): ReactElement => {
   const showLastModifiedDate = useAtomValue(showLastModifiedDateAtom);
   const showType = useAtomValue(showTypeAtom);
 
-  const descWidth = 250;
-  const typeWidth = 120;
-  const modifiedWidth = 175;
-  let valueWidth = 300;
-  valueWidth += showDescription ? 0 : descWidth;
-  valueWidth += showLastModifiedDate ? 0 : modifiedWidth;
-  valueWidth += showType ? 0 : typeWidth;
+  // min width for table 1000
+  const nameWidth = 350;
+  let valueWidth = 400;
+  const typeWidth = 150;
+  const actionWidth = 150;
+  // const descWidth = 250;
+  // const typeWidth = 120;
+  // const modifiedWidth = 175;
+  // let valueWidth = 300;
+  // valueWidth += showDescription ? 0 : descWidth;
+  // valueWidth += showLastModifiedDate ? 0 : modifiedWidth;
+  // valueWidth += showType ? 0 : typeWidth;
 
-  const handleEditClick = (arn: string) => {
-    console.log('edit clicked', arn);
-    const found = parameters.find((p) => p.ARN === arn);
-    setModalTitle('Edit Parameter');
-    setActionItem(found);
-    setOpen(true);
-  };
-
-  const columns: GridColDef<Parameter>[] = [
+  const columns: GridColDef<ParamType>[] = [
     {
-      field: 'Name',
+      field: 'name',
       headerName: 'Name',
-      //minWidth: 330,
-      //flex: 1,
+      // minWidth: nameWidth,
+      flex: 1,
       sortable: true,
       renderCell: (params) => {
         const paths = params.value.split(pathDelimiter);
@@ -120,26 +95,32 @@ export const ParamTable = (props: PropsType): ReactElement => {
           );
         });
         return (
-          <Copyable value={params.value}>
-            <span style={{ wordBreak: 'break-word', justifyContent: 'center', alignItems: 'center' }}>
-              <Breadcrumbs>{breadCrumbItems}</Breadcrumbs>
-            </span>
-          </Copyable>
+          <Box height={'100%'} sx={{ alignContent: 'center' }}>
+            <Copyable value={params.value}>
+              <span style={{ wordBreak: 'break-word', justifyContent: 'center', alignItems: 'center' }}>
+                <Breadcrumbs>{breadCrumbItems}</Breadcrumbs>
+              </span>
+            </Copyable>
+          </Box>
         );
       },
     },
     {
-      field: 'Value',
+      field: 'value',
       headerName: 'Value',
-      //minWidth: valueWidth,
-      //flex: 1,
+      width: valueWidth,
+      // minWidth: valueWidth,
+      // flex: 0.5,
       renderCell: (params) => {
         const value = params.value as string;
         let useJsonInput = valueIsJson(value);
+
+        // const calcWidth = colWidthValue === -1 ? valueWidth : colWidthValue;
+        const calcWidth = valueWidth;
         if (useJsonInput) {
           return (
             <Copyable value={value}>
-              <JSONInput
+              {/* <JSONInput
                 placeholder={JSON.parse(value)}
                 viewOnly
                 theme="light_mitsuketa_tribute"
@@ -147,99 +128,69 @@ export const ParamTable = (props: PropsType): ReactElement => {
                 height="150px"
                 width={`${valueWidth - 25}px`}
                 confirmGood={false}
-              />
-              {/* <pre>{JSON.stringify(JSON.parse(value), null, 2)}</pre> */}
+              /> */}
+              <span
+                style={{
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  width: `${calcWidth - 25}px`,
+                }}
+              >
+                {JSON.stringify(JSON.parse(value), null, 2)}
+              </span>
             </Copyable>
           );
         }
         return (
           <Copyable value={value}>
-            <span style={{ wordBreak: 'break-word' }}>{value}</span>
+            <span style={{ overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', width: `${calcWidth - 25}px` }}>{value}</span>
           </Copyable>
         );
       },
     },
     {
-      field: 'Description',
-      headerName: 'Description',
-      //minWidth: descWidth,
-      //flex: 1,
-      renderCell: (params) => {
-        const value = params.value as string;
-        return value ? (
-          <Copyable value={value}>
-            <Typography sx={{ wordBreak: 'break-word' }}>{value}</Typography>
-          </Copyable>
-        ) : (
-          <i>No Description</i>
-        );
-      },
-    },
-    {
-      field: 'Type',
+      field: 'type',
       headerName: 'Type',
-      //minWidth: typeWidth,
-      //flex: 1,
+      flex: 0.1,
     },
-    {
-      field: 'LastModifiedDate',
-      headerName: 'LastModifiedDate',
-      //minWidth: modifiedWidth,
-      //flex: 1,
-      sortable: true,
+    // {
+    //   field: 'lastModifiedDate',
+    //   headerName: 'LastModifiedDate',
+    //   //minWidth: modifiedWidth,
+    //   //flex: 1,
+    //   sortable: true,
 
-      renderCell: (params) => {
-        const value = params.value as number | Date;
-        return (
-          <span>
-            {<ReactTimeAgo date={value} timeStyle="round" />} ({value.toLocaleString()})
-          </span>
-        );
-      },
-    },
+    //   renderCell: (params) => {
+    //     const value = params.value as number | Date;
+    //     return (
+    //       <span>
+    //         {<ReactTimeAgo date={value} timeStyle="round" />} ({value.toLocaleString()})
+    //       </span>
+    //     );
+    //   },
+    // },
     {
       field: 'Actions',
       headerName: 'Actions',
-      //width: 150,
+      width: actionWidth,
       renderCell: (params) => {
         return (
-          <Stack direction={'row'} spacing={1}>
-            <IconButton aria-label="edit" onClick={() => handleEditClick(params.id as string)}>
+          <Stack direction={'row'} spacing={1} height={'100%'}>
+            <IconButton onClick={() => handleEditClick(params.id as string)}>
               <EditOutlinedIcon />
             </IconButton>
-            <IconButton aria-label="duplicate">
+            <IconButton onClick={() => handleDuplicateClick(params.id as string)}>
               <CopyAllOutlinedIcon />
             </IconButton>
-            <IconButton aria-label="delete">
+            <IconButton onClick={() => handleDeleteClick(params.id as string)}>
               <DeleteOutlineIcon />
             </IconButton>
-            {/* <CreationFormButton buttonText="Edit" modalText="Edit" initialFormData={currentData} resetOnClose editFlow />
-          <CreationFormButton buttonColor="primary" buttonText="Duplicate" initialFormData={currentData} resetOnClose />
-          <DeleteButton name={e.Name} onDelete={deleteParameter} /> */}
           </Stack>
         );
       },
     },
   ];
-
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
-  const title = useMemo(() => {
-    if (router.pathname === '/notes/new') {
-      return 'New Note';
-    }
-    const editNoteId = matchPath('/notes/:noteId/edit', router.pathname);
-    if (editNoteId) {
-      return `Note ${editNoteId} - Edit`;
-    }
-    const showNoteId = matchPath('/notes/:noteId', router.pathname);
-    if (showNoteId) {
-      return `Note ${showNoteId}`;
-    }
-
-    return undefined;
-  }, [router.pathname]);
 
   return (
     <Stack sx={{ flexGrow: 1, width: '100%', height: '80vh' }}>
@@ -252,34 +203,18 @@ export const ParamTable = (props: PropsType): ReactElement => {
           initialState={{
             columns: {
               columnVisibilityModel: {
-                Type: showType,
-                Description: showDescription,
-                LastModifiedDate: showLastModifiedDate,
-              },
-            },
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
+                type: showType,
+                description: showDescription,
+                lastModifiedDate: showLastModifiedDate,
               },
             },
           }}
-          pageSizeOptions={[5]}
-          checkboxSelection
           disableRowSelectionOnClick
           disableAutosize={false}
-          getRowId={(row) => row.ARN as string}
+          getRowId={(row) => row.name}
           autoPageSize={true}
         />
       )}
-      <Modal title={modalTitle} open={open} onClose={handleClose}>
-        <Stack spacing={2} sx={modalStyle}>
-          <Typography id="modal-modal-title" variant="h5" component="h5">
-            {modalTitle}
-          </Typography>
-          <Divider />
-          <ParamForm param={actionItem} setOpen={setOpen} />
-        </Stack>
-      </Modal>
     </Stack>
   );
 };

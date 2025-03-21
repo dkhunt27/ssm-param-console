@@ -5,6 +5,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LinearProgress from '@mui/material/LinearProgress';
 import type { Navigation } from '@toolpad/core/AppProvider';
+import { NotificationsProvider } from '@toolpad/core/useNotifications';
 
 import theme from '../theme';
 
@@ -23,12 +24,6 @@ const NAVIGATION: Navigation = [
     title: 'Settings',
     icon: <SettingsIcon />,
   },
-  {
-    segment: 'params',
-    title: 'Params',
-    icon: <SettingsIcon />,
-    pattern: 'params{/:id}*',
-  },
 ];
 
 const BRANDING = {
@@ -42,7 +37,7 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <React.Suspense fallback={<LinearProgress />}>
             <NextAppProvider navigation={NAVIGATION} branding={BRANDING} theme={theme}>
-              {props.children}
+              <NotificationsProvider>{props.children}</NotificationsProvider>
             </NextAppProvider>
           </React.Suspense>
         </AppRouterCacheProvider>

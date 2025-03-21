@@ -3,4 +3,10 @@ export type DescribedParamType = {
   Type: string;
 };
 
-export type ParamType = { id: string; name: string; description?: string; type: 'SecureString' | 'String' | 'StringList'; value: string };
+export type ParamTypeType = 'SecureString' | 'String' | 'StringList';
+
+export type ParamType = {
+  name: string;
+  type: ParamTypeType;
+  value: string;
+};

@@ -2,7 +2,7 @@ import { ParamType } from './types';
 
 export const paramsMock: ParamType[] = [
   {
-    id: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/subProjB/qa/apiUrl',
+    // arn: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/subProjB/qa/apiUrl',
     // DataType: 'text',
     // LastModifiedDate: new Date('2024-12-20T20:42:48.367Z'),
     name: '/projA/subProjB/qa/apiUrl',
@@ -11,7 +11,7 @@ export const paramsMock: ParamType[] = [
     // Version: 2,
   },
   {
-    id: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/sandbox/auth0ClientId',
+    // arn: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/sandbox/auth0ClientId',
     // DataType: 'text',
     // LastModifiedDate: new Date('2024-07-17T19:15:45.626Z'),
     name: '/projA/automation/sandbox/auth0ClientId',
@@ -20,7 +20,7 @@ export const paramsMock: ParamType[] = [
     // Version: 1,
   },
   {
-    id: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/sandbox/auth0ClientSecret',
+    // arn: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/sandbox/auth0ClientSecret',
     // DataType: 'text',
     // LastModifiedDate: new Date('2024-07-17T19:15:45.858Z'),
     name: '/projA/automation/sandbox/auth0ClientSecret',
@@ -29,7 +29,7 @@ export const paramsMock: ParamType[] = [
     // Version: 1,
   },
   {
-    id: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/nonProd/config',
+    // arn: 'arn:aws:ssm:us-west-2:123456789012:parameter/projA/automation/nonProd/config',
     // DataType: 'text',
     // LastModifiedDate: new Date('2024-07-17T19:15:46.281Z'),
     name: '/projA/automation/nonProd/config',
