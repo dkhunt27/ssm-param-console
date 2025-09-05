@@ -36,3 +36,7 @@ curl --request POST \
   --data '{"startingPath":"/some/path"}' \
   http://localhost:3000/api/ssm/get
 ```
+
+## Inspiration
+
+Derived a lot from [smblee/parameter-store-manager](https://github.com/smblee/parameter-store-manager).  Was having issues getting electron to work so converted to next/react and updated mui.
