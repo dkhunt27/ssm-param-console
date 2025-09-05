@@ -2,7 +2,7 @@
   "name": "ssm-param-console",
   "version": "0.1.0",
   "scripts": {
-    "dev": "AWS_PROFILE=legacy-non-prod next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

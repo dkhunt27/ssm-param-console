@@ -1,33 +1,38 @@
 
-# Create Toolpad App
+# SSM Param Console
+
+This aims to make managing settings/configuration in AWS SSM Parameter Store easier using the built in path support.  
 
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-toolpad-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+Uses the following libraries:
+
+- React
+- React Query
+- React Hook Form
+- Mui
+- Mui toolpad
+- Jotai
+
 ## Setup
 
-Run `npx auth secret` to generate a secret and replace the value in the .env.local file with it.
+This uses AWS SDK v3.  Set up your aws credentials accordingly.  See [here](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-credentials-node.html).
 
-Add the CLIENT_ID and CLIENT_SECRET from your OAuth provider to the .env.local file.
+Install app via `yarn install`
 
 ## Getting Started
 
-First, run the development server: `npm run dev`
+First, run the development server: `yarn dev`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## Testing/Debugging Notes
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
-
-## API
+### API
 
 ```bash
 curl --request POST \
   --header "Content-Type: application/json" \
-  --data '{"startingPath":"/artemis/clientDashboard"}' \
-  http://localhost:3000/api/ssm/describe
+  --data '{"startingPath":"/some/path"}' \
+  http://localhost:3000/api/ssm/get
 ```
